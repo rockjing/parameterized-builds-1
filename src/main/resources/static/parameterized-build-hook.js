@@ -78,6 +78,18 @@
             }
         };
 
+    var pipelineFields =
+    {
+        '.branch-none': 'branch-none;',
+        '.branch-all': 'branch-all;',
+        '.branch-pr': 'branch-pr;',
+        '.branch-nonpr': 'branch-nonpr;',
+        '.pr-none': 'pr-none;',
+        '.pr-as-is': 'pr-asis;',
+        '.pr-as-merge': 'pr-asmerge;',
+        '.pr-both': 'pr-both;',
+    }
+
     //
     // functions
     //
@@ -106,6 +118,22 @@
             existing = existing.replace(value, "");
         }
         trigger.val(existing);
+    }
+
+    function updatePipelineSettings (element, value) {
+        var id = element.get(0).id.replace("job-", "");
+        var pipelineSettings = element.find('#pipelineSettings-' + id);
+        var existing = pipelineSettings.val();
+        var prefix = value.split("-")[0];
+        var settingRegex = new RegExp(prefix + '.+?;');
+
+        if (existing.search(settingRegex) == -1) {
+            existing += value;
+        } else {
+            existing = existing.replace(settingRegex, value);
+        }
+
+        pipelineSettings.val(existing);
     }
 
     function showField (existing, trigger, field) {
@@ -147,6 +175,20 @@
         });
     }
 
+    function setPipelineButton (buttonName) {
+        $(document).on('click', buttonName, function(e) {
+            e.preventDefault();
+            var classes = $(this).find('span').attr('class');
+            var id = $(this).parent().parent().get(0).id.replace("job-", "");
+            if (!classes.indexOf("aui-lozenge-success") > -1) {
+                updatePipelineSettings($(this).parent().parent(), pipelineFields[buttonName])
+                var prefix = buttonName.split("-")[0].substring(1);
+                $(this).parent().find("a[class^='" + prefix + "']").find('span').removeClass("aui-lozenge-success");
+                $(this).find('span').toggleClass("aui-lozenge-success");
+            }
+        });
+    }
+
     //
     // event bindings
     //
@@ -159,6 +201,7 @@
             'isTag' : false,
             'isPipeline': false,
             'trigger' : '',
+            'pipelineSettings': 'branch-none;pr-none;',
             'token' : '',
             'branch' : '',
             'path' : '',
@@ -252,4 +295,5 @@
 
     // create event bindings for each trigger
     Object.keys(triggers).forEach(setButton);
+    Object.keys(pipelineFields).forEach(setPipelineButton);
 }(AJS.$));

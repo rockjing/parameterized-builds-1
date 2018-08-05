@@ -34,7 +34,7 @@
                 <div class="field-group"><div class="error">{$errors['jenkins-admin-error']}</div></div>
         {/if}
         {let $configKeys: $config ? keys($config) : [] /}
-        {let $visibleInputsCount: $configKeys.length > 0 ? ($configKeys.length / 9) : 1 /}
+        {let $visibleInputsCount: $configKeys.length > 0 ? ($configKeys.length / 11) : 1 /}
         {for $i in range($visibleInputsCount)}
             {call .addJob}
                 {param canDelete: $visibleInputsCount > 1 /}
@@ -43,6 +43,7 @@
                 {param isTag: $config and $config['isTag-' + $i] ? $config['isTag-' + $i] : false /}
                 {param isPipeline: $config and $config['isPipeline-' + $i] ? $config['isPipeline-' + $i] : false /}
                 {param triggers: $config and $config['triggers-' + $i] ? $config['triggers-' + $i] : null /}
+                {param pipelineSettings: $config and $config['pipelineSettings-' + $i] ? $config['pipelineSettings-' + $i] : 'branch-none;pr-none;' /}
                 {param token: $config and $config['token-' + $i] ? $config['token-' + $i] : null /}
                 {param buildParameters: $config and $config['buildParameters-' + $i] ? $config['buildParameters-' + $i] : null /}
                 {param branchRegex: $config and $config['branchRegex-' + $i] ? $config['branchRegex-' + $i] : null /}
@@ -70,6 +71,7 @@
  * @param isTag
  * @param isPipeline
  * @param triggers
+ * @param pipelineSettings
  * @param token
  * @param buildParameters
  * @param branchRegex
@@ -117,6 +119,15 @@
                 hide-regular-job-settings
             {/if}
         {/let}
+        {let $pipelineClass}
+            {if $collapsed and $isPipeline}
+                hidden
+            {elseif $collapsed}
+                hidden hide-pipeline-job-settings
+            {elseif not $isPipeline}
+                hide-pipeline-job-settings
+            {/if}
+        {/let}
         {call aui.form.selectField}
             {param id: 'isTag-' + $count /}
             {param labelContent: 'Ref Type' /}
@@ -151,7 +162,7 @@
             <br>
             <a class="pr-merged" href="#" title="Triggers when a pull request is merged"><span class="aui-lozenge {strContains($triggers, 'prmerged;') ? 'aui-lozenge-success' : ''}">PR Merged</span></a>&nbsp;
             <a class="pr-declined" href="#" title="Triggers when a pull request is declined"><span class="aui-lozenge {strContains($triggers, 'prdeclined;') ? 'aui-lozenge-success' : ''}">PR Declined</span></a>&nbsp;
-            <a class="pr-deleted" href="#" title="Triggers when a pull request is deleted"><span class="aui-lozenge {strContains($triggers, 'prdeleted;') ? 'aui-lozenge-success' : ''}">PR Deleted</span></a>
+            <a class="pr-deleted" href="#" title="Triggers when a pull request is deleted"><span class="aui-lozenge {strContains($triggers, 'prdeleted;') ? 'aui-lozenge-success' : ''}">PR Deleted</span></a>&nbsp;
             <a class="pr-approved" href="#" title="Triggers when a pull request is approved"><span class="aui-lozenge {strContains($triggers, 'prapproved;') ? 'aui-lozenge-success' : ''}">PR Approved</span></a>
             {if $errors and $errors['triggers-' + $count]}<div class="error">{$errors['triggers-' + $count]}</div>{/if}
         </div>
@@ -162,6 +173,30 @@
             {param extraClasses: 'hide-trigger' /}
             {param errorTexts: $errors ? $errors['triggers-' + $count] : null /}
         {/call}
+
+        <div class="field-group { $pipelineClass }">
+            <label for="pipeline-buttons-{$count}">Pipeline Settings<span class="aui-icon icon-required"></span></label>
+            <a class="branch-none" href="#" title="Do not build branches"><span class="aui-lozenge {not strContains($pipelineSettings, 'branch-all;') and not strContains($pipelineSettings, 'branch-pr;') and not strContains($pipelineSettings, 'branch-nonpr;')
+            ? 'aui-lozenge-success' : ''}">No Branches</span></a>&nbsp;
+            <a class="branch-all" href="#" title="Triggers when new branches are created or updated"><span class="aui-lozenge {strContains($pipelineSettings, 'branch-all;') ? 'aui-lozenge-success' : ''}">All Branches</span></a>&nbsp;
+            <a class="branch-pr" href="#" title="Triggers on branch events for branches filed as PRs"><span class="aui-lozenge {strContains($pipelineSettings, 'branch-pr;') ? 'aui-lozenge-success' : ''}">PR Branches Only</span></a>&nbsp;
+            <a class="branch-nonpr" href="#" title="Triggers on branch events for branches not filed as PRs"><span class="aui-lozenge {strContains($pipelineSettings, 'branch-nonpr;') ? 'aui-lozenge-success' : ''}">Exclude PR Branches</span></a>
+            <br>
+            <a class="pr-none" href="#" title="Do not build PRs"><span class="aui-lozenge {not strContains($pipelineSettings, 'pr-asis;') and not strContains($pipelineSettings, 'pr-asmerge;') and not strContains($pipelineSettings, 'pr-both;')
+            ? 'aui-lozenge-success' : ''}">No PRs</span></a>&nbsp;
+            <a class="pr-as-is" href="#" title="Triggers on PR events and pulls latest commit"><span class="aui-lozenge {strContains($pipelineSettings, 'pr-asis;') ? 'aui-lozenge-success' : ''}">PR as Latest Commit</span></a>&nbsp;
+            <a class="pr-as-merge" href="#" title="Triggers on PR events and pulls merge commit"><span class="aui-lozenge {strContains($pipelineSettings, 'pr-asmerge;') ? 'aui-lozenge-success' : ''}">PR as Merge Commit</span></a>&nbsp;
+            <a class="pr-both" href="#" title="Triggers on PR events and pulls both lastest and merge commit"><span class="aui-lozenge {strContains($pipelineSettings, 'pr-both;') ? 'aui-lozenge-success' : ''}">PR as Both</span></a>
+            {if $errors and $errors['pipelineSettings-' + $count]}<div class="error">{$errors['pipelineSettings-' + $count]}</div>{/if}
+        </div>
+        {call aui.form.textField}
+            {param id: 'pipelineSettings-' + $count /}
+            {param value: $pipelineSettings /}
+            {param labelContent: 'Pipeline Settings'  /}
+            {param extraClasses: 'hide-trigger' /}
+            {param errorTexts: $errors ? $errors['pipelineSettings-' + $count] : null /}
+        {/call}
+
         {call aui.form.textField}
             {param id: 'token-' + $count /}
             {param value: $token /}
