@@ -19,6 +19,7 @@ public class Job {
 	private final String jobName;
 	private final boolean isTag;
 	private final List<Trigger> triggers;
+	private final List<BranchSourceBehaviors> branchSourceBehaviors;
 	private final String token;
 	private final List<Entry<String, Object>> buildParameters;
 	private final String branchRegex;
@@ -32,6 +33,7 @@ public class Job {
 		this.jobName = builder.jobName;
 		this.isTag = builder.isTag;
 		this.triggers = builder.triggers;
+		this.branchSourceBehaviors = builder.branchSourceBehaviors;
 		this.token = builder.token;
 		this.buildParameters = builder.buildParameters;
 		this.branchRegex = builder.branchRegex;
@@ -55,6 +57,10 @@ public class Job {
 
 	public List<Trigger> getTriggers() {
 		return triggers;
+	}
+
+	public List<BranchSourceBehaviors> getBranchSourceBehaviors() {
+		return branchSourceBehaviors;
 	}
 
 	public String getToken() {
@@ -109,6 +115,7 @@ public class Job {
 		private String jobName;
 		private boolean isTag;
 		private List<Trigger> triggers;
+		private List<BranchSourceBehaviors> branchSourceBehaviors;
 		private String token;
 		private List<Entry<String, Object>> buildParameters;
 		private String branchRegex;
@@ -137,7 +144,6 @@ public class Job {
 				try {
 					triggers.add(Trigger.valueOf(trig.toUpperCase()));
 				} catch (IllegalArgumentException e) {
-					logger.error("IllegalArgumentException in Job.triggers: " + e.getMessage(), e);
 					triggers.add(Trigger.NULL);
 				}
 			}
@@ -146,6 +152,18 @@ public class Job {
 
 		public JobBuilder triggers(List<Trigger> triggers) {
 			this.triggers = triggers;
+			return this;
+		}
+
+		public JobBuilder branchSourceBehaviors(String[] branchSourceBehaviorsStrings) {
+			List<BranchSourceBehaviors> branchSourceBehaviors = Arrays.stream(branchSourceBehaviorsStrings)
+					.map(BranchSourceBehaviors::fromSettingValue)
+					.collect(Collectors.toList());
+			return branchSourceBehaviors(branchSourceBehaviors);
+		}
+
+		public JobBuilder branchSourceBehaviors(List<BranchSourceBehaviors> branchSourceBehaviors) {
+			this.branchSourceBehaviors = branchSourceBehaviors;
 			return this;
 		}
 
@@ -223,7 +241,7 @@ public class Job {
 	public JobBuilder copy(){
 		return new JobBuilder(jobId).jobName(jobName).isTag(isTag).triggers(triggers).token(token)
 				.buildParameters(buildParameters).branchRegex(branchRegex).pathRegex(pathRegex).permissions(permissions)
-				.prDestRegex(prDestRegex).isPipeline(isPipeline);
+				.prDestRegex(prDestRegex).isPipeline(isPipeline).branchSourceBehaviors(branchSourceBehaviors);
 	}
 
 	public String buildUrl(Server jenkinsServer, BitbucketVariables bitbucketVariables,
@@ -322,6 +340,47 @@ public class Job {
 				case "PR DECLINED": return PRDECLINED;
 				case "PR DELETED": return PRDELETED;
 				case "PR APPROVED": return PRAPPROVED;
+				default: return NULL;
+			}
+		}
+	}
+
+	public enum BranchSourceBehaviors {
+		ALLBRANCHES, PRBRANCHES, NONPRBRANCHES, PRLATEST, PRMERGE, PRBOTH, NULL;
+
+		@Override
+		public String toString() {
+			switch(this) {
+				case ALLBRANCHES: return "ALL BRANCHES";
+				case PRBRANCHES: return "PR BRANCHES ONLY";
+				case NONPRBRANCHES: return "EXCLUDE PR BRANCHES";
+				case PRLATEST: return "PR AS LATEST COMMIT";
+				case PRMERGE: return "PR AS MERGE COMMIT";
+				case PRBOTH: return "PR AS BOTH";
+				default: return super.toString();
+			}
+		}
+
+		public static BranchSourceBehaviors fromToString(String toString){
+			switch(toString) {
+				case "ALL BRANCHES": return ALLBRANCHES;
+				case "PR BRANCHES ONLY": return PRBRANCHES;
+				case "EXCLUDE PR BRANCHES": return NONPRBRANCHES;
+				case "PR AS LATEST COMMIT": return PRLATEST;
+				case "PR AS MERGE COMMIT": return PRMERGE;
+				case "PR AS BOTH": return PRBOTH;
+				default: return NULL;
+			}
+		}
+
+		public static BranchSourceBehaviors fromSettingValue(String fromString){
+			switch(fromString) {
+				case "branch-all": return ALLBRANCHES;
+				case "branch-pr": return PRBRANCHES;
+				case "branch-nonpr": return NONPRBRANCHES;
+				case "pr-asis": return PRLATEST;
+				case "pr-asmerge": return PRMERGE;
+				case "pr-both": return PRBOTH;
 				default: return NULL;
 			}
 		}

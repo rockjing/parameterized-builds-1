@@ -37,6 +37,7 @@ public class SettingsServiceTest {
 		String jobName = "jobName";
 		String jobName2 = "jobName2";
 		String triggers = "add;push";
+		String branchSources = "branch-all;pr-none;";
 		String params = "param1=value1";
 		String token = "token";
 		String branchRegex = "branchRegex";
@@ -46,6 +47,7 @@ public class SettingsServiceTest {
 		Map<String, Object> jobConfig = new LinkedHashMap<>();
 		jobConfig.put(SettingsService.JOB_PREFIX + "0", jobName);
 		jobConfig.put(SettingsService.TRIGGER_PREFIX + "0", triggers);
+		jobConfig.put(SettingsService.BRANCH_SOURCE_PREFIX + "0", branchSources);
 		jobConfig.put(SettingsService.PARAM_PREFIX + "0", params);
 		jobConfig.put(SettingsService.TOKEN_PREFIX + "0", token);
 		jobConfig.put(SettingsService.BRANCH_PREFIX + "0", branchRegex);
@@ -54,6 +56,7 @@ public class SettingsServiceTest {
 		jobConfig.put(SettingsService.PRDEST_PREFIX + "0", prDestRegex);
 		jobConfig.put(SettingsService.JOB_PREFIX + "1", jobName2);
 		jobConfig.put(SettingsService.TRIGGER_PREFIX + "1", "add");
+		jobConfig.put(SettingsService.BRANCH_SOURCE_PREFIX + "1", "branch-none;pr-none;");
 		jobConfig.put(SettingsService.PARAM_PREFIX + "1", "");
 		jobConfig.put(SettingsService.TOKEN_PREFIX + "1", "");
 		jobConfig.put(SettingsService.BRANCH_PREFIX + "1", "");
@@ -63,11 +66,13 @@ public class SettingsServiceTest {
 		List<Job> jobs = settingsService.getJobs(jobConfig);
 
 		List<Trigger> triggerList = Arrays.asList(Trigger.ADD, Trigger.PUSH);
+		List<Job.BranchSourceBehaviors> branchSourceList = Arrays.asList(Job.BranchSourceBehaviors.ALLBRANCHES, Job.BranchSourceBehaviors.NULL);
 		Entry<String, String> paramMap = new SimpleEntry<>("param1", "value1");
 		assertEquals(2, jobs.size());
 		assertEquals(0, jobs.get(0).getJobId());
 		assertEquals(jobName, jobs.get(0).getJobName());
 		assertEquals(triggerList, jobs.get(0).getTriggers());
+		assertEquals(branchSourceList, jobs.get(0).getBranchSourceBehaviors());
 		assertEquals(paramMap, jobs.get(0).getBuildParameters().get(0));
 		assertEquals(token, jobs.get(0).getToken());
 		assertEquals(branchRegex, jobs.get(0).getBranchRegex());
@@ -90,6 +95,7 @@ public class SettingsServiceTest {
 		Map<String, Object> jobConfig = new HashMap<>();
 		jobConfig.put(SettingsService.JOB_PREFIX + "0", "jobname");
 		jobConfig.put(SettingsService.TRIGGER_PREFIX + "0", "add");
+		jobConfig.put(SettingsService.BRANCH_SOURCE_PREFIX + "0", "");
 		jobConfig.put(SettingsService.PARAM_PREFIX + "0", "");
 		jobConfig.put(SettingsService.TOKEN_PREFIX + "0", "");
 		jobConfig.put(SettingsService.BRANCH_PREFIX + "0", "");
@@ -107,6 +113,7 @@ public class SettingsServiceTest {
 		jobConfig.put(SettingsService.JOB_PREFIX + "0", "jobname");
 		jobConfig.put(SettingsService.ISTAG_PREFIX + "0", "true");
 		jobConfig.put(SettingsService.TRIGGER_PREFIX + "0", "add");
+		jobConfig.put(SettingsService.BRANCH_SOURCE_PREFIX + "0", "");
 		jobConfig.put(SettingsService.PARAM_PREFIX + "0", "");
 		jobConfig.put(SettingsService.TOKEN_PREFIX + "0", "");
 		jobConfig.put(SettingsService.BRANCH_PREFIX + "0", "");
@@ -123,7 +130,8 @@ public class SettingsServiceTest {
 		Map<String, Object> jobConfig = new HashMap<>();
 		jobConfig.put(SettingsService.JOB_PREFIX + "0", "jobname");
 		jobConfig.put(SettingsService.ISPIPELINE_PREFIX + "0", "true");
-		jobConfig.put(SettingsService.TRIGGER_PREFIX + "0", "add");
+		jobConfig.put(SettingsService.TRIGGER_PREFIX + "0", "");
+		jobConfig.put(SettingsService.BRANCH_SOURCE_PREFIX + "0", "branch-all;");
 		jobConfig.put(SettingsService.PARAM_PREFIX + "0", "");
 		jobConfig.put(SettingsService.TOKEN_PREFIX + "0", "");
 		jobConfig.put(SettingsService.BRANCH_PREFIX + "0", "");

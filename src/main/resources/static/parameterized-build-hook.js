@@ -1,5 +1,15 @@
 (function($){
 
+    var hideableFields =
+    {
+        '#isTag-': 'hide-regular-job-settings',
+        '#trigger-buttons-': 'hide-regular-job-settings',
+        '#branchRegex-': 'hide-regular-job-settings',
+        '#pathRegex-': 'hide-regular-job-settings',
+        '#prDestinationRegex-': 'hide-regular-job-settings',
+        '#pipeline-buttons-': 'hide-pipeline-job-settings'
+    }
+
     // create button definitions here
     // button logic is automatically created for all values in triggers
     var triggers =
@@ -78,6 +88,18 @@
             }
         };
 
+    var pipelineFields =
+    {
+        '.branch-none': 'branch-none;',
+        '.branch-all': 'branch-all;',
+        '.branch-pr': 'branch-pr;',
+        '.branch-nonpr': 'branch-nonpr;',
+        '.pr-none': 'pr-none;',
+        '.pr-as-is': 'pr-asis;',
+        '.pr-as-merge': 'pr-asmerge;',
+        '.pr-both': 'pr-both;',
+    }
+
     //
     // functions
     //
@@ -106,6 +128,22 @@
             existing = existing.replace(value, "");
         }
         trigger.val(existing);
+    }
+
+    function updateBranchSourceBehaviors (element, value) {
+        var id = element.get(0).id.replace("job-", "");
+        var branchSourceBehaviors = element.find('#branchSourceBehaviors-' + id);
+        var existing = branchSourceBehaviors.val();
+        var prefix = value.split("-")[0];
+        var settingRegex = new RegExp(prefix + '.+?;');
+
+        if (existing.search(settingRegex) == -1) {
+            existing += value;
+        } else {
+            existing = existing.replace(settingRegex, value);
+        }
+
+        branchSourceBehaviors.val(existing);
     }
 
     function showField (existing, trigger, field) {
@@ -147,6 +185,38 @@
         });
     }
 
+    function setPipelineButton (buttonName) {
+        $(document).on('click', buttonName, function(e) {
+            e.preventDefault();
+            var classes = $(this).find('span').attr('class');
+            var id = $(this).parent().parent().get(0).id.replace("job-", "");
+            if (!classes.indexOf("aui-lozenge-success") > -1) {
+                updateBranchSourceBehaviors($(this).parent().parent(), pipelineFields[buttonName])
+                var prefix = buttonName.split("-")[0].substring(1);
+                $(this).parent().find("a[class^='" + prefix + "']").find('span').removeClass("aui-lozenge-success");
+                $(this).find('span').toggleClass("aui-lozenge-success");
+            }
+        });
+    }
+
+    function setIsPipelineButton () {
+        $(document).on('click', '[id^=isPipeline]', function(e) {
+            var id = $(this).parent().parent().parent().get(0).id.replace("job-", "");
+            Object.keys(hideableFields).forEach(function(fieldName) {
+                var target = $(fieldName + id)
+                if (target.is("div")){
+                    $(fieldName + id).toggleClass(hideableFields[fieldName])
+                } else {
+                    $(fieldName + id).parent().toggleClass(hideableFields[fieldName])
+                }
+            });
+            if (this.checked) {
+
+            }
+        });
+    }
+    setIsPipelineButton()
+
     //
     // event bindings
     //
@@ -159,6 +229,7 @@
             'isTag' : false,
             'isPipeline': false,
             'trigger' : '',
+            'branchSourceBehaviors': 'branch-none;pr-none;',
             'token' : '',
             'branch' : '',
             'path' : '',
@@ -252,4 +323,5 @@
 
     // create event bindings for each trigger
     Object.keys(triggers).forEach(setButton);
+    Object.keys(pipelineFields).forEach(setPipelineButton);
 }(AJS.$));

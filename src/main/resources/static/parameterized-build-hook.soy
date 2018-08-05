@@ -1,7 +1,7 @@
 {namespace com.kylenicholls.stash.parameterizedbuilds.hook}
 
 /**
- * @param? collapsed
+ * @param? defaultClass
  * @param? triggers
  * @param? class
  * @param? valid_triggers
@@ -17,12 +17,10 @@
         {/foreach}
     {/let}
 
-    {if $collapsed and not $is_trigger}
-        hidden {$class}
-    {elseif $collapsed and $is_trigger}
-        hidden
-    {elseif not $collapsed and not $is_trigger}
-        {$class}
+    {if not $is_trigger}
+        {$defaultClass} {$class}
+    {else}
+        {$defaultClass}
     {/if}
 {/template}
 
@@ -36,7 +34,7 @@
                 <div class="field-group"><div class="error">{$errors['jenkins-admin-error']}</div></div>
         {/if}
         {let $configKeys: $config ? keys($config) : [] /}
-        {let $visibleInputsCount: $configKeys.length > 0 ? ($configKeys.length / 9) : 1 /}
+        {let $visibleInputsCount: $configKeys.length > 0 ? ($configKeys.length / 11) : 1 /}
         {for $i in range($visibleInputsCount)}
             {call .addJob}
                 {param canDelete: $visibleInputsCount > 1 /}
@@ -45,6 +43,7 @@
                 {param isTag: $config and $config['isTag-' + $i] ? $config['isTag-' + $i] : false /}
                 {param isPipeline: $config and $config['isPipeline-' + $i] ? $config['isPipeline-' + $i] : false /}
                 {param triggers: $config and $config['triggers-' + $i] ? $config['triggers-' + $i] : null /}
+                {param branchSourceBehaviors: $config and $config['branchSourceBehaviors-' + $i] ? $config['branchSourceBehaviors-' + $i] : 'branch-none;pr-none;' /}
                 {param token: $config and $config['token-' + $i] ? $config['token-' + $i] : null /}
                 {param buildParameters: $config and $config['buildParameters-' + $i] ? $config['buildParameters-' + $i] : null /}
                 {param branchRegex: $config and $config['branchRegex-' + $i] ? $config['branchRegex-' + $i] : null /}
@@ -72,6 +71,7 @@
  * @param isTag
  * @param isPipeline
  * @param triggers
+ * @param branchSourceBehaviors
  * @param token
  * @param buildParameters
  * @param branchRegex
@@ -110,6 +110,24 @@
             {param isRequired: true /}
             {param extraClasses: $collapsed ? 'hidden' : '' /}
         {/call}
+        {let $defaultClass}
+            {if $collapsed and $isPipeline}
+                hidden hide-regular-job-settings
+            {elseif $collapsed}
+                hidden
+            {elseif $isPipeline}
+                hide-regular-job-settings
+            {/if}
+        {/let}
+        {let $pipelineClass}
+            {if $collapsed and $isPipeline}
+                hidden
+            {elseif $collapsed}
+                hidden hide-pipeline-job-settings
+            {elseif not $isPipeline}
+                hide-pipeline-job-settings
+            {/if}
+        {/let}
         {call aui.form.selectField}
             {param id: 'isTag-' + $count /}
             {param labelContent: 'Ref Type' /}
@@ -121,7 +139,7 @@
                     'text': 'tag',
                     'value': 'true'
                 ]] /}
-            {param extraClasses: $collapsed ? 'hidden' : '' /}
+            {param extraClasses: $defaultClass /}
         {/call}
         {call aui.form.checkboxField}
             {param legendContent : 'Multibranch Pipeline' /}
@@ -132,7 +150,7 @@
             ]] /}
             {param extraClasses: $collapsed ? 'hidden field-group' : 'field-group' /}
         {/call}
-        <div class="field-group {$collapsed ? 'hidden' : ''}">
+        <div class="field-group { $defaultClass }" id="trigger-buttons-{$count}">
             <label for="trigger-buttons-{$count}">Triggers<span class="aui-icon icon-required"></span></label>
             <a class="branch-created" href="#" title="Triggers when new branches or tags are created"><span class="aui-lozenge {strContains($triggers, 'add;') ? 'aui-lozenge-success' : ''}">Ref Created</span></a>&nbsp;
             <a class="push-event" href="#" title="Triggers on branch push events"><span class="aui-lozenge {strContains($triggers, 'push;') ? 'aui-lozenge-success' : ''}">Push Event</span></a>&nbsp;
@@ -144,7 +162,7 @@
             <br>
             <a class="pr-merged" href="#" title="Triggers when a pull request is merged"><span class="aui-lozenge {strContains($triggers, 'prmerged;') ? 'aui-lozenge-success' : ''}">PR Merged</span></a>&nbsp;
             <a class="pr-declined" href="#" title="Triggers when a pull request is declined"><span class="aui-lozenge {strContains($triggers, 'prdeclined;') ? 'aui-lozenge-success' : ''}">PR Declined</span></a>&nbsp;
-            <a class="pr-deleted" href="#" title="Triggers when a pull request is deleted"><span class="aui-lozenge {strContains($triggers, 'prdeleted;') ? 'aui-lozenge-success' : ''}">PR Deleted</span></a>
+            <a class="pr-deleted" href="#" title="Triggers when a pull request is deleted"><span class="aui-lozenge {strContains($triggers, 'prdeleted;') ? 'aui-lozenge-success' : ''}">PR Deleted</span></a>&nbsp;
             <a class="pr-approved" href="#" title="Triggers when a pull request is approved"><span class="aui-lozenge {strContains($triggers, 'prapproved;') ? 'aui-lozenge-success' : ''}">PR Approved</span></a>
             {if $errors and $errors['triggers-' + $count]}<div class="error">{$errors['triggers-' + $count]}</div>{/if}
         </div>
@@ -155,6 +173,30 @@
             {param extraClasses: 'hide-trigger' /}
             {param errorTexts: $errors ? $errors['triggers-' + $count] : null /}
         {/call}
+
+        <div class="field-group { $pipelineClass }" id="pipeline-buttons-{$count}">
+            <label for="pipeline-buttons-{$count}">Branch Source Behaviors<span class="aui-icon icon-required"></span></label>
+            <a class="branch-none" href="#" title="Do not build branches"><span class="aui-lozenge {not strContains($branchSourceBehaviors, 'branch-all;') and not strContains($branchSourceBehaviors, 'branch-pr;') and not strContains($branchSourceBehaviors, 'branch-nonpr;')
+            ? 'aui-lozenge-success' : ''}">No Branches</span></a>&nbsp;
+            <a class="branch-all" href="#" title="Triggers when new branches are created or updated"><span class="aui-lozenge {strContains($branchSourceBehaviors, 'branch-all;') ? 'aui-lozenge-success' : ''}">All Branches</span></a>&nbsp;
+            <a class="branch-pr" href="#" title="Triggers on branch events for branches filed as PRs"><span class="aui-lozenge {strContains($branchSourceBehaviors, 'branch-pr;') ? 'aui-lozenge-success' : ''}">PR Branches Only</span></a>&nbsp;
+            <a class="branch-nonpr" href="#" title="Triggers on branch events for branches not filed as PRs"><span class="aui-lozenge {strContains($branchSourceBehaviors, 'branch-nonpr;') ? 'aui-lozenge-success' : ''}">Exclude PR Branches</span></a>
+            <br>
+            <a class="pr-none" href="#" title="Do not build PRs"><span class="aui-lozenge {not strContains($branchSourceBehaviors, 'pr-asis;') and not strContains($branchSourceBehaviors, 'pr-asmerge;') and not strContains($branchSourceBehaviors, 'pr-both;')
+            ? 'aui-lozenge-success' : ''}">No PRs</span></a>&nbsp;
+            <a class="pr-as-is" href="#" title="Triggers on PR events and pulls latest commit"><span class="aui-lozenge {strContains($branchSourceBehaviors, 'pr-asis;') ? 'aui-lozenge-success' : ''}">PR as Latest Commit</span></a>&nbsp;
+            <a class="pr-as-merge" href="#" title="Triggers on PR events and pulls merge commit"><span class="aui-lozenge {strContains($branchSourceBehaviors, 'pr-asmerge;') ? 'aui-lozenge-success' : ''}">PR as Merge Commit</span></a>&nbsp;
+            <a class="pr-both" href="#" title="Triggers on PR events and pulls both lastest and merge commit"><span class="aui-lozenge {strContains($branchSourceBehaviors, 'pr-both;') ? 'aui-lozenge-success' : ''}">PR as Both</span></a>
+            {if $errors and $errors['branchSourceBehaviors-' + $count]}<div class="error">{$errors['branchSourceBehaviors-' + $count]}</div>{/if}
+        </div>
+        {call aui.form.textField}
+            {param id: 'branchSourceBehaviors-' + $count /}
+            {param value: $branchSourceBehaviors /}
+            {param labelContent: 'Branch Source Behaviors'  /}
+            {param extraClasses: 'hide-trigger' /}
+            {param errorTexts: $errors ? $errors['branchSourceBehaviors-' + $count] : null /}
+        {/call}
+
         {call aui.form.textField}
             {param id: 'token-' + $count /}
             {param value: $token /}
@@ -176,7 +218,7 @@
         {/call}
         {let $branchClasses}
             {call .setHideClasses}
-                {param collapsed: $collapsed /}
+                {param defaultClass: $defaultClass /}
                 {param triggers: $triggers /}
                 {param valid_triggers: ['add;', 'delete;', 'push;'] /}
                 {param class: 'hide-branches' /}
@@ -193,7 +235,7 @@
         {/call}
         {let $pathClasses}
             {call .setHideClasses}
-                {param collapsed: $collapsed /}
+                {param defaultClass: $defaultClass /}
                 {param triggers: $triggers /}
                 {param valid_triggers: ['push;', 'pullrequest;', 'prmerged;', 'prdeclined;', 'prdeleted;'] /}
                 {param class: 'hide-paths' /}
@@ -210,7 +252,7 @@
         {/call}
         {let $permissionsClasses}
             {call .setHideClasses}
-                {param collapsed: $collapsed /}
+                {param defaultClass: $collapsed ? 'hidden' : '' /}
                 {param triggers: $triggers /}
                 {param valid_triggers: ['manual;', ] /}
                 {param class: 'hide-permissions' /}
@@ -235,7 +277,7 @@
         {/call}
         {let $pathClasses}
             {call .setHideClasses}
-                {param collapsed: $collapsed /}
+                {param defaultClass: $defaultClass /}
                 {param triggers: $triggers /}
                 {param valid_triggers: ['pullrequest;', 'prmerged;', 'prdeclined;', 'prdeleted;'] /}
                 {param class: 'hide-pr-dest' /}

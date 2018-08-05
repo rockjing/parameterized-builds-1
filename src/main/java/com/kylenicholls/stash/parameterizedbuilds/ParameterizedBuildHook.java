@@ -101,7 +101,13 @@ public class ParameterizedBuildHook
 				errors.addFieldError(SettingsService.JOB_PREFIX + i, "Field is required");
 			}
 
-			if (job.getTriggers().contains(Trigger.NULL)) {
+			boolean missingTriggers = job.getTriggers().stream().allMatch(x -> x == Trigger.NULL);
+			boolean missingBranchSource = job.getBranchSourceBehaviors().stream().allMatch(x -> x == Job.BranchSourceBehaviors.NULL);
+
+			if (job.getIsPipeline() && missingBranchSource){
+				errors.addFieldError(SettingsService.BRANCH_SOURCE_PREFIX
+						+ i, "You must choose at least one branch source");
+			} else if (!job.getIsPipeline() && missingTriggers){
 				errors.addFieldError(SettingsService.TRIGGER_PREFIX
 						+ i, "You must choose at least one trigger");
 			}

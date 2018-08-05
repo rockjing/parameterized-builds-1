@@ -199,7 +199,7 @@ public class ParameterizedBuildHookTest {
     @Test
     public void testShowErrorIfJobNameEmpty() {
         Job job = new Job.JobBuilder(1).jobName("").triggers("add".split(";")).buildParameters("")
-                .branchRegex("").pathRegex("").build();
+                .branchRegex("").pathRegex("").branchSourceBehaviors("".split(";")).build();
         jobs.add(job);
         buildHook.validate(settings, validationErrors, repositoryScope);
 
@@ -210,7 +210,7 @@ public class ParameterizedBuildHookTest {
     @Test
     public void testShowErrorIfTriggersEmpty() {
         Job job = new Job.JobBuilder(1).jobName("name").triggers("".split(";")).buildParameters("")
-                .branchRegex("").pathRegex("").build();
+                .branchRegex("").pathRegex("").branchSourceBehaviors("".split(";")).build();
         jobs.add(job);
         buildHook.validate(settings, validationErrors, repositoryScope);
 
@@ -221,7 +221,7 @@ public class ParameterizedBuildHookTest {
     @Test
     public void testShowErrorIfBranchRegexInvalid() {
         Job job = new Job.JobBuilder(1).jobName("name").triggers("add".split(";"))
-                .buildParameters("").branchRegex("(").pathRegex("").build();
+                .buildParameters("").branchRegex("(").pathRegex("").branchSourceBehaviors("".split(";")).build();
         jobs.add(job);
         buildHook.validate(settings, validationErrors, repositoryScope);
 
@@ -232,11 +232,32 @@ public class ParameterizedBuildHookTest {
     @Test
     public void testShowErrorIfPathRegexInvalid() {
         Job job = new Job.JobBuilder(1).jobName("name").triggers("add".split(";"))
-                .buildParameters("").branchRegex("").pathRegex("(").build();
+                .buildParameters("").branchRegex("").pathRegex("(").branchSourceBehaviors("".split(";")).build();
         jobs.add(job);
         buildHook.validate(settings, validationErrors, repositoryScope);
 
         verify(validationErrors, times(1))
                 .addFieldError(SettingsService.PATH_PREFIX + "0", "Unclosed group");
+    }
+
+    @Test
+    public void testShowErrorIfPipelineJobHasNoBranchSources() {
+        Job job = new Job.JobBuilder(1).jobName("name").triggers("".split(";")).isPipeline(true)
+                .buildParameters("").branchRegex("").pathRegex("").branchSourceBehaviors("branch-none;".split(";")).build();
+        jobs.add(job);
+        buildHook.validate(settings, validationErrors, repositoryScope);
+
+        verify(validationErrors, times(1))
+                .addFieldError(SettingsService.BRANCH_SOURCE_PREFIX + "0", "You must choose at least one branch source");
+    }
+
+    @Test
+    public void testNoErrorIfPipelineJobHasNoTriggers() {
+        Job job = new Job.JobBuilder(1).jobName("name").triggers("".split(";")).isPipeline(true)
+                .buildParameters("").branchRegex("").pathRegex("").branchSourceBehaviors("branch-all;".split(";")).build();
+        jobs.add(job);
+        buildHook.validate(settings, validationErrors, repositoryScope);
+
+        verify(validationErrors, times(0)).addFieldError(any(), any());
     }
 }

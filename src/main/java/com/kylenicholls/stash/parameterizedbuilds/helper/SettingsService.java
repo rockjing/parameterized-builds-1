@@ -24,6 +24,7 @@ public class SettingsService {
 	public static final String JOB_PREFIX = "jobName-";
 	public static final String ISTAG_PREFIX = "isTag-";
 	public static final String TRIGGER_PREFIX = "triggers-";
+	public static final String BRANCH_SOURCE_PREFIX = "branchSourceBehaviors-";
 	public static final String TOKEN_PREFIX = "token-";
 	public static final String PARAM_PREFIX = "buildParameters-";
 	public static final String BRANCH_PREFIX = "branchRegex-";
@@ -93,6 +94,8 @@ public class SettingsService {
 						.triggers(parameterMap
 								.get(entry.getKey().replace(JOB_PREFIX, TRIGGER_PREFIX)).toString()
 								.split(";"))
+						.branchSourceBehaviors(fetchValue(entry.getKey().replace(JOB_PREFIX, BRANCH_SOURCE_PREFIX),
+								parameterMap, "branch-all;pr-none;").split(";"))
 						.buildParameters(parameterMap
 								.get(entry.getKey().replace(JOB_PREFIX, PARAM_PREFIX)).toString())
 						.token(parameterMap.get(entry.getKey().replace(JOB_PREFIX, TOKEN_PREFIX))
