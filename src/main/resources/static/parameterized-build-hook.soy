@@ -1,7 +1,7 @@
 {namespace com.kylenicholls.stash.parameterizedbuilds.hook}
 
 /**
- * @param? collapsed
+ * @param? defaultClass
  * @param? triggers
  * @param? class
  * @param? valid_triggers
@@ -17,12 +17,10 @@
         {/foreach}
     {/let}
 
-    {if $collapsed and not $is_trigger}
-        hidden {$class}
-    {elseif $collapsed and $is_trigger}
-        hidden
-    {elseif not $collapsed and not $is_trigger}
-        {$class}
+    {if not $is_trigger}
+        {$defaultClass} {$class}
+    {else}
+        {$defaultClass}
     {/if}
 {/template}
 
@@ -110,6 +108,15 @@
             {param isRequired: true /}
             {param extraClasses: $collapsed ? 'hidden' : '' /}
         {/call}
+        {let $defaultClass}
+            {if $collapsed and $isPipeline}
+                hidden hide-regular-job-settings
+            {elseif $collapsed}
+                hidden
+            {elseif $isPipeline}
+                hide-regular-job-settings
+            {/if}
+        {/let}
         {call aui.form.selectField}
             {param id: 'isTag-' + $count /}
             {param labelContent: 'Ref Type' /}
@@ -121,7 +128,7 @@
                     'text': 'tag',
                     'value': 'true'
                 ]] /}
-            {param extraClasses: $collapsed ? 'hidden' : '' /}
+            {param extraClasses: $defaultClass /}
         {/call}
         {call aui.form.checkboxField}
             {param legendContent : 'Multibranch Pipeline' /}
@@ -132,7 +139,7 @@
             ]] /}
             {param extraClasses: $collapsed ? 'hidden field-group' : 'field-group' /}
         {/call}
-        <div class="field-group {$collapsed ? 'hidden' : ''}">
+        <div class="field-group { $defaultClass }">
             <label for="trigger-buttons-{$count}">Triggers<span class="aui-icon icon-required"></span></label>
             <a class="branch-created" href="#" title="Triggers when new branches or tags are created"><span class="aui-lozenge {strContains($triggers, 'add;') ? 'aui-lozenge-success' : ''}">Ref Created</span></a>&nbsp;
             <a class="push-event" href="#" title="Triggers on branch push events"><span class="aui-lozenge {strContains($triggers, 'push;') ? 'aui-lozenge-success' : ''}">Push Event</span></a>&nbsp;
@@ -176,7 +183,7 @@
         {/call}
         {let $branchClasses}
             {call .setHideClasses}
-                {param collapsed: $collapsed /}
+                {param defaultClass: $defaultClass /}
                 {param triggers: $triggers /}
                 {param valid_triggers: ['add;', 'delete;', 'push;'] /}
                 {param class: 'hide-branches' /}
@@ -193,7 +200,7 @@
         {/call}
         {let $pathClasses}
             {call .setHideClasses}
-                {param collapsed: $collapsed /}
+                {param defaultClass: $defaultClass /}
                 {param triggers: $triggers /}
                 {param valid_triggers: ['push;', 'pullrequest;', 'prmerged;', 'prdeclined;', 'prdeleted;'] /}
                 {param class: 'hide-paths' /}
@@ -210,7 +217,7 @@
         {/call}
         {let $permissionsClasses}
             {call .setHideClasses}
-                {param collapsed: $collapsed /}
+                {param defaultClass: $collapsed ? 'hidden' : '' /}
                 {param triggers: $triggers /}
                 {param valid_triggers: ['manual;', ] /}
                 {param class: 'hide-permissions' /}
@@ -235,7 +242,7 @@
         {/call}
         {let $pathClasses}
             {call .setHideClasses}
-                {param collapsed: $collapsed /}
+                {param defaultClass: $defaultClass /}
                 {param triggers: $triggers /}
                 {param valid_triggers: ['pullrequest;', 'prmerged;', 'prdeclined;', 'prdeleted;'] /}
                 {param class: 'hide-pr-dest' /}
