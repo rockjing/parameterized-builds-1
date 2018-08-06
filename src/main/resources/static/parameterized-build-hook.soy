@@ -150,7 +150,7 @@
             ]] /}
             {param extraClasses: $collapsed ? 'hidden field-group' : 'field-group' /}
         {/call}
-        <div class="field-group { $defaultClass }">
+        <div class="field-group { $defaultClass }" id="trigger-buttons-{$count}">
             <label for="trigger-buttons-{$count}">Triggers<span class="aui-icon icon-required"></span></label>
             <a class="branch-created" href="#" title="Triggers when new branches or tags are created"><span class="aui-lozenge {strContains($triggers, 'add;') ? 'aui-lozenge-success' : ''}">Ref Created</span></a>&nbsp;
             <a class="push-event" href="#" title="Triggers on branch push events"><span class="aui-lozenge {strContains($triggers, 'push;') ? 'aui-lozenge-success' : ''}">Push Event</span></a>&nbsp;
@@ -174,7 +174,7 @@
             {param errorTexts: $errors ? $errors['triggers-' + $count] : null /}
         {/call}
 
-        <div class="field-group { $pipelineClass }">
+        <div class="field-group { $pipelineClass }" id="pipeline-buttons-{$count}">
             <label for="pipeline-buttons-{$count}">Pipeline Settings<span class="aui-icon icon-required"></span></label>
             <a class="branch-none" href="#" title="Do not build branches"><span class="aui-lozenge {not strContains($pipelineSettings, 'branch-all;') and not strContains($pipelineSettings, 'branch-pr;') and not strContains($pipelineSettings, 'branch-nonpr;')
             ? 'aui-lozenge-success' : ''}">No Branches</span></a>&nbsp;

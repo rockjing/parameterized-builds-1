@@ -1,5 +1,15 @@
 (function($){
 
+    var hideableFields =
+    {
+        '#isTag-': 'hide-regular-job-settings',
+        '#trigger-buttons-': 'hide-regular-job-settings',
+        '#branchRegex-': 'hide-regular-job-settings',
+        '#pathRegex-': 'hide-regular-job-settings',
+        '#prDestinationRegex-': 'hide-regular-job-settings',
+        '#pipeline-buttons-': 'hide-pipeline-job-settings'
+    }
+
     // create button definitions here
     // button logic is automatically created for all values in triggers
     var triggers =
@@ -188,6 +198,24 @@
             }
         });
     }
+
+    function setIsPipelineButton () {
+        $(document).on('click', '[id^=isPipeline]', function(e) {
+            var id = $(this).parent().parent().parent().get(0).id.replace("job-", "");
+            Object.keys(hideableFields).forEach(function(fieldName) {
+                var target = $(fieldName + id)
+                if (target.is("div")){
+                    $(fieldName + id).toggleClass(hideableFields[fieldName])
+                } else {
+                    $(fieldName + id).parent().toggleClass(hideableFields[fieldName])
+                }
+            });
+            if (this.checked) {
+
+            }
+        });
+    }
+    setIsPipelineButton()
 
     //
     // event bindings
