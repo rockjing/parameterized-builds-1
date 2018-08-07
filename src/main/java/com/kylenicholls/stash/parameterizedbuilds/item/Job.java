@@ -346,7 +346,7 @@ public class Job {
 	}
 
 	public enum BranchSourceBehaviors {
-		ALLBRANCHES, PRBRANCHES, NONPRBRANCHES, PRLATEST, PRMERGE, PRBOTH, NULL;
+		ALLBRANCHES, PRBRANCHES, NONPRBRANCHES, PRLATEST, PRMERGE, PRBOTH, MANUAL, NULL;
 
 		@Override
 		public String toString() {
@@ -357,6 +357,7 @@ public class Job {
 				case PRLATEST: return "PR AS LATEST COMMIT";
 				case PRMERGE: return "PR AS MERGE COMMIT";
 				case PRBOTH: return "PR AS BOTH";
+				case MANUAL: return "MANUAL BUILDS";
 				default: return super.toString();
 			}
 		}
@@ -369,6 +370,7 @@ public class Job {
 				case "PR AS LATEST COMMIT": return PRLATEST;
 				case "PR AS MERGE COMMIT": return PRMERGE;
 				case "PR AS BOTH": return PRBOTH;
+				case "MANUAL BUILDS": return MANUAL;
 				default: return NULL;
 			}
 		}
@@ -381,6 +383,7 @@ public class Job {
 				case "pr-asis": return PRLATEST;
 				case "pr-asmerge": return PRMERGE;
 				case "pr-both": return PRBOTH;
+				case "manual-allowed": return MANUAL;
 				default: return NULL;
 			}
 		}

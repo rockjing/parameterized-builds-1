@@ -43,7 +43,7 @@
                 {param isTag: $config and $config['isTag-' + $i] ? $config['isTag-' + $i] : false /}
                 {param isPipeline: $config and $config['isPipeline-' + $i] ? $config['isPipeline-' + $i] : false /}
                 {param triggers: $config and $config['triggers-' + $i] ? $config['triggers-' + $i] : null /}
-                {param branchSourceBehaviors: $config and $config['branchSourceBehaviors-' + $i] ? $config['branchSourceBehaviors-' + $i] : 'branch-none;pr-none;' /}
+                {param branchSourceBehaviors: $config and $config['branchSourceBehaviors-' + $i] ? $config['branchSourceBehaviors-' + $i] : 'branch-none;pr-none;manual-disallowed;' /}
                 {param token: $config and $config['token-' + $i] ? $config['token-' + $i] : null /}
                 {param buildParameters: $config and $config['buildParameters-' + $i] ? $config['buildParameters-' + $i] : null /}
                 {param branchRegex: $config and $config['branchRegex-' + $i] ? $config['branchRegex-' + $i] : null /}
@@ -187,6 +187,9 @@
             <a class="pr-as-is" href="#" title="Triggers on PR events and pulls latest commit"><span class="aui-lozenge {strContains($branchSourceBehaviors, 'pr-asis;') ? 'aui-lozenge-success' : ''}">PR as Latest Commit</span></a>&nbsp;
             <a class="pr-as-merge" href="#" title="Triggers on PR events and pulls merge commit"><span class="aui-lozenge {strContains($branchSourceBehaviors, 'pr-asmerge;') ? 'aui-lozenge-success' : ''}">PR as Merge Commit</span></a>&nbsp;
             <a class="pr-both" href="#" title="Triggers on PR events and pulls both lastest and merge commit"><span class="aui-lozenge {strContains($branchSourceBehaviors, 'pr-both;') ? 'aui-lozenge-success' : ''}">PR as Both</span></a>
+            <br>
+            <a class="manual-disallowed" href="#" title="Do not allow manual builds"><span class="aui-lozenge {not strContains($branchSourceBehaviors, 'manual-allowed;') ? 'aui-lozenge-success' : ''}">No Manual Builds</span></a>&nbsp;
+            <a class="manual-allowed" href="#" title="Do not allow manual builds"><span class="aui-lozenge {strContains($branchSourceBehaviors, 'manual-allowed;') ? 'aui-lozenge-success' : ''}">Manual Builds</span></a>
             {if $errors and $errors['branchSourceBehaviors-' + $count]}<div class="error">{$errors['branchSourceBehaviors-' + $count]}</div>{/if}
         </div>
         {call aui.form.textField}

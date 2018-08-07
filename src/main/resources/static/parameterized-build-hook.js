@@ -98,6 +98,8 @@
         '.pr-as-is': 'pr-asis;',
         '.pr-as-merge': 'pr-asmerge;',
         '.pr-both': 'pr-both;',
+        '.manual-disallowed': 'manual-disallowed;',
+        '.manual-allowed': 'manual-allowed;'
     }
 
     //
@@ -229,7 +231,7 @@
             'isTag' : false,
             'isPipeline': false,
             'trigger' : '',
-            'branchSourceBehaviors': 'branch-none;pr-none;',
+            'branchSourceBehaviors': 'branch-none;pr-none;manual-disallowed;',
             'token' : '',
             'branch' : '',
             'path' : '',
