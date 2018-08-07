@@ -43,7 +43,16 @@ public abstract class BaseHandler {
 
     abstract BitbucketVariables createBitbucketVariables();
 
-    abstract boolean validateJob(Job job, BitbucketVariables bitbucketVariables);
+    abstract boolean validateStandardJob(Job job, BitbucketVariables bitbucketVariables);
+
+    abstract boolean validatePipelineJob(Job job, BitbucketVariables bitbucketVariables);
+
+    boolean validateJob(Job job, BitbucketVariables bitbucketVariables){
+        if (job.getIsPipeline()){
+            return validatePipelineJob(job, bitbucketVariables);
+        }
+        return validateStandardJob(job, bitbucketVariables);
+    }
 
     boolean validateTrigger(Job job, Job.Trigger trigger){
         return job.getTriggers().contains(trigger);

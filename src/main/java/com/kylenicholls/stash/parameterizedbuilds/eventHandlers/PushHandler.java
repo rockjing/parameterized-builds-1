@@ -21,8 +21,8 @@ public class PushHandler extends RefHandler {
     }
 
     @Override
-    boolean validateJob(Job job, BitbucketVariables bitbucketVariables) {
-        return super.validateJob(job, bitbucketVariables) && validatePath(job, bitbucketVariables);
+    boolean validateStandardJob(Job job, BitbucketVariables bitbucketVariables) {
+        return super.validateStandardJob(job, bitbucketVariables) && validatePath(job, bitbucketVariables);
     }
 
     boolean validatePath(Job job, BitbucketVariables bitbucketVariables) {

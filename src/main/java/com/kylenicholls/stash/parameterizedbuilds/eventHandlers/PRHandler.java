@@ -61,9 +61,19 @@ public class PRHandler extends BaseHandler{
     }
 
     @Override
-    boolean validateJob(Job job, BitbucketVariables bitbucketVariables){
+    boolean validateStandardJob(Job job, BitbucketVariables bitbucketVariables){
         String prDest = pullRequest != null ? pullRequest.getToRef().getDisplayId() : "";
         return validatePrDest(job, prDest) && validateTrigger(job, trigger) && validatePath(job, bitbucketVariables);
+    }
+
+    @Override
+    boolean validatePipelineJob(Job job, BitbucketVariables bitbucketVariables){
+        boolean canMerge = validateCanMerge(); //forces refs to be evaluated, see https://issues.jenkins-ci.org/browse/JENKINS-45997
+        return job.getBranchSourceBehaviors().stream().anyMatch(Job.BranchSourceBehaviors::prDiscoveryEnabled);
+    }
+
+    boolean validateCanMerge() {
+        return this.pullRequestService.canMerge(this.repository.getId(), this.pullRequest.getId()).canMerge();
     }
 
     boolean validatePrDest(Job job,String prDest){

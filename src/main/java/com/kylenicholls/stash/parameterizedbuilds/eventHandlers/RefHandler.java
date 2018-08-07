@@ -51,7 +51,12 @@ public class RefHandler extends BaseHandler{
     }
 
     @Override
-    boolean validateJob(Job job, BitbucketVariables bitbucketVariables){
+    boolean validateStandardJob(Job job, BitbucketVariables bitbucketVariables){
         return validateTag(job, isTag) && validateBranch(job, branch) && validateTrigger(job, trigger);
+    }
+
+    @Override
+    boolean validatePipelineJob(Job job, BitbucketVariables bitbucketVariables){
+        return job.getBranchSourceBehaviors().stream().anyMatch(Job.BranchSourceBehaviors::branchDiscoveryEnabled);
     }
 }

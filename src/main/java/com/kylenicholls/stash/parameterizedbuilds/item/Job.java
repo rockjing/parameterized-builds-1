@@ -384,5 +384,13 @@ public class Job {
 				default: return NULL;
 			}
 		}
+
+		public boolean branchDiscoveryEnabled(){
+			return Arrays.asList(ALLBRANCHES, PRBRANCHES, NONPRBRANCHES).contains(this);
+		}
+
+		public boolean prDiscoveryEnabled(){
+			return Arrays.asList(PRLATEST, PRMERGE, PRBOTH).contains(this);
+		}
 	}
 }
