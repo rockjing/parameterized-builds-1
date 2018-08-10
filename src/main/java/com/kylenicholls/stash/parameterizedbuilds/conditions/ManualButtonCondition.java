@@ -31,7 +31,9 @@ public class ManualButtonCondition extends BaseCondition {
 		Settings settings = settingsService.getSettings(repository);
 
 		for (Job job : settingsService.getJobs(settings.asMap())) {
-			if (job.getTriggers().contains(Trigger.MANUAL)) {
+			if (!job.getIsPipeline() && job.getTriggers().contains(Trigger.MANUAL)) {
+				return true;
+			} else if (job.getIsPipeline() && job.getBranchSourceBehaviors().contains(Job.BranchSourceBehaviors.MANUAL)){
 				return true;
 			}
 		}
