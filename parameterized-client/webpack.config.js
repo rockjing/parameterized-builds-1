@@ -5,6 +5,7 @@ module.exports = {
     mode: 'production',
     entry: {
         'hook/parameterized_build_hook': ['./src/hook/view.js'],
+        'scripts/jenkins/pb-blayout-trigger': ['./src/manual/pb-blayout-trigger.js']
     },
     output: {
         path: path.join(__dirname, '../src/main/resources/'),
@@ -26,6 +27,7 @@ module.exports = {
     },
     plugins: [
     ],
-    externals: [
-    ],
+    externals: {
+        jquery: 'jQuery'
+    },
 };

@@ -49,8 +49,7 @@
 
   <!-- Layout trigger button resource -->
   <web-resource key="pb-blayout-trigger-resource" name="Jenkins branch build layout resource">
-    <resource name="pb-blayout-trigger.js" type="download" location="/scripts/jenkins/pb-blayout-trigger.js"/>
-    <dependency>${project.groupId}.${project.artifactId}:build-dialog</dependency>
+    <resource name="pb-blayout-trigger.js" type="download" location="/scripts/jenkins/pb-blayout-trigger.pack.js"/>
   </web-resource>
   
   <!-- List button resource -->
