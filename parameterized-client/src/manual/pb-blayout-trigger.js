@@ -8,10 +8,12 @@ let closeModal = () => {
     $('#parameterized-builds-modal').remove()
 }
 
+const urlRegex = /(.+?)(\/projects\/\w+?\/repos\/\w+?\/)browse.*/
+const urlParts = window.location.href.match(urlRegex);
+const restBaseUrl = urlParts[1] + "/rest/parameterized-builds/latest" + urlParts[2];
+
 const getJenkinsJobs = (branch, commit) => {
-    const urlRegex = /(.+?)(\/projects\/\w+?\/repos\/\w+?\/)browse.*/
-    let urlParts = window.location.href.match(urlRegex);
-    let restUrl = urlParts[1] + "/rest/parameterized-builds/latest" + urlParts[2] + "getJobs?branch=" + branch + "&commit=" + commit;
+    let restUrl = restBaseUrl + "getJobs?branch=" + branch + "&commit=" + commit;
     return axios.get(restUrl, {
         timeout: 1000 * 60
     });
@@ -29,7 +31,7 @@ $(document).on('aui-dropdown2-show', '#branch-actions-menu', function () {
     $buildTriggerButton.on('click', () => {
         jobPromise.then(response => {
             let jobs = response.data;
-            ReactDOM.render(<BuildDialog closeHandler={closeModal} jobs={jobs}/>, document.getElementById("parameterized-builds-modal"));
+            ReactDOM.render(<BuildDialog closeHandler={closeModal} jobs={jobs} restUrl={restBaseUrl} branch={branch}/>, document.getElementById("parameterized-builds-modal"));
         }).catch(error => {
             console.error("Unable to fetch jobs")
             console.error(error)
