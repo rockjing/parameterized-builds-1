@@ -3,6 +3,7 @@ package com.kylenicholls.stash.parameterizedbuilds.item;
 import java.util.*;
 
 import com.atlassian.bitbucket.pull.PullRequest;
+import com.atlassian.bitbucket.pull.PullRequestParticipant;
 import com.atlassian.bitbucket.repository.Branch;
 import com.atlassian.bitbucket.repository.RefChange;
 import com.atlassian.bitbucket.repository.Repository;
@@ -13,10 +14,14 @@ import com.kylenicholls.stash.parameterizedbuilds.item.Job.Trigger;
 
 public class BitbucketVariables {
 	private  Map<String, BitbucketVariable<String>> variables;
+	/**
+	 * SET_VALUES
+	 * update by Rock on 2019.06.16 - add $PREMAIL
+	 */
 	private final String [] SET_VALUES = {
 			"$BRANCH", "$COMMIT", "$URL", "$REPOSITORY", "$PROJECT", "$PRID",
 			"$PRAUTHOR", "$PRTITLE", "$PRDESCRIPTION", "$PRDESTINATION",
-			"$PRURL", "$TRIGGER", "$MERGECOMMIT",};
+			"$PRURL", "$TRIGGER", "$MERGECOMMIT","$PREMAIL"};
 	private final Set<String> allowedVariables = new HashSet<>(Arrays.asList(SET_VALUES));
 
 	private BitbucketVariables(Builder builder){
@@ -52,6 +57,19 @@ public class BitbucketVariables {
 		public Builder populateFromPR(PullRequest pullRequest, Repository repository, String projectKey,
 									  Trigger trigger, String url){
 			String prId = Long.toString(pullRequest.getId());
+
+			//add emails
+			StringBuilder emailBuilder = new StringBuilder();
+			emailBuilder.append(pullRequest.getAuthor().getUser().getEmailAddress());
+			for (PullRequestParticipant reviewer : pullRequest.getReviewers()) {
+
+				emailBuilder.append(","+ reviewer.getUser().getEmailAddress());
+
+			}
+
+
+
+			
 			return add("$BRANCH", () -> pullRequest.getFromRef().getDisplayId())
 					.add("$COMMIT", () -> pullRequest.getFromRef().getLatestCommit())
 					.add("$URL", () -> url)
@@ -59,6 +77,7 @@ public class BitbucketVariables {
 					.add("$PROJECT", () -> projectKey)
 					.add("$PRID", () -> prId)
 					.add("$PRAUTHOR", () -> pullRequest.getAuthor().getUser().getDisplayName())
+					.add("$PREMAIL", ()-> emailBuilder.toString())
 					.add("$PRTITLE", pullRequest::getTitle)
 					.add("$PRDESCRIPTION", pullRequest::getDescription)
 					.add("$PRDESTINATION", () ->  pullRequest.getToRef().getDisplayId())
