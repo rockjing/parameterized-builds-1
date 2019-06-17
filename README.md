@@ -153,3 +153,17 @@ for the given branch. Triggers still need to be selected like any other job.
 * Pull requests should be opened against master
 * Write unit tests for any changes you make
 * A passing [Travis CI](https://travis-ci.org/KyleLNicholls/parameterized-builds) build is required
+
+# update 
+
+> 2019.06.17 - add $AUTHOREMAIL varaible in hook
+
+why? 
+One Developer completed a commit, the reviewers finished reviewing and merged.
+Bitbucket will send  $AUTHOREMAIL(developer and reviewers' emails) to jenkins.
+Jenkins starts its job and then send email back to dev/rev the result of the job.
+
+If no $AUTHOREMAIL, the link was broken. That's why I add it.
+
+enjoy it.
+

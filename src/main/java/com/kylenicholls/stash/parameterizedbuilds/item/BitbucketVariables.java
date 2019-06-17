@@ -16,12 +16,12 @@ public class BitbucketVariables {
 	private  Map<String, BitbucketVariable<String>> variables;
 	/**
 	 * SET_VALUES
-	 * update by Rock on 2019.06.16 - add $PREMAIL
+	 * update by Rock on 2019.06.16 - add $AUTHOREMAIL
 	 */
 	private final String [] SET_VALUES = {
 			"$BRANCH", "$COMMIT", "$URL", "$REPOSITORY", "$PROJECT", "$PRID",
 			"$PRAUTHOR", "$PRTITLE", "$PRDESCRIPTION", "$PRDESTINATION",
-			"$PRURL", "$TRIGGER", "$MERGECOMMIT","$PREMAIL"};
+			"$PRURL", "$TRIGGER", "$MERGECOMMIT","$AUTHOREMAIL"};
 	private final Set<String> allowedVariables = new HashSet<>(Arrays.asList(SET_VALUES));
 
 	private BitbucketVariables(Builder builder){
@@ -60,7 +60,14 @@ public class BitbucketVariables {
 
 			//add emails
 			StringBuilder emailBuilder = new StringBuilder();
-			emailBuilder.append(pullRequest.getAuthor().getUser().getEmailAddress());
+			if(pullRequest.getAuthor()!=null) {
+                if (pullRequest.getAuthor().getUser() != null) {
+                    if (pullRequest.getAuthor().getUser().getEmailAddress() != null) {
+                        emailBuilder.append(pullRequest.getAuthor().getUser().getEmailAddress());
+                    }
+                }
+            }
+
 			for (PullRequestParticipant reviewer : pullRequest.getReviewers()) {
 
 				emailBuilder.append(","+ reviewer.getUser().getEmailAddress());
@@ -77,7 +84,7 @@ public class BitbucketVariables {
 					.add("$PROJECT", () -> projectKey)
 					.add("$PRID", () -> prId)
 					.add("$PRAUTHOR", () -> pullRequest.getAuthor().getUser().getDisplayName())
-					.add("$PREMAIL", ()-> emailBuilder.toString())
+					.add("$AUTHOREMAIL", ()-> emailBuilder.toString())
 					.add("$PRTITLE", pullRequest::getTitle)
 					.add("$PRDESCRIPTION", pullRequest::getDescription)
 					.add("$PRDESTINATION", () ->  pullRequest.getToRef().getDisplayId())
