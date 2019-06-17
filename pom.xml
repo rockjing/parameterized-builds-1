@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.kylenicholls.stash</groupId>
 	<artifactId>parameterized-builds</artifactId>
-	<version>4.0.2</version>
+	<version>4.0.2-withPREMAIL</version>
 
 	<organization>
 		<name>Kyle Nicholls</name>
@@ -181,6 +181,9 @@
 			<version>4.1.1</version>
 			<scope>test</scope>
 		</dependency>
+
+
+
 	</dependencies>
 	<build>
 		<plugins>

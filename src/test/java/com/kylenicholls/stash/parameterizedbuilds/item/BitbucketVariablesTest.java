@@ -28,9 +28,11 @@ public class BitbucketVariablesTest {
 	private final String url = "http://uri";
 	private final String PR_TITLE = "prtitle";
 	private final String REPO_SLUG = "reposlug";
+
 	private final Long PR_ID = 15L;
 	private final String PR_DESCRIPTION = "Description of this PR";
 	private final String PR_AUTHOR = "this guy";
+	private final String PR_EMAIL = "rock_jing@sina.com";
 	private final String SOURCE_BRANCH = "sourcebranch";
 	private final String DEST_BRANCH = "destbranch";
 	private final String COMMIT = "commithash";
@@ -41,6 +43,8 @@ public class BitbucketVariablesTest {
 		refChange = mock(RefChange.class);
 		repository = mock(Repository.class);
 		branch = mock(Branch.class);
+		StringBuilder emailBuilder = new StringBuilder();
+
 
 		PullRequestParticipant author = mock(PullRequestParticipant.class);
 		PullRequestRef prFromRef = mock(PullRequestRef.class);
@@ -59,6 +63,9 @@ public class BitbucketVariablesTest {
 		when(branch.getLatestCommit()).thenReturn(COMMIT);
 		when(author.getUser()).thenReturn(user);
 		when(user.getDisplayName()).thenReturn(PR_AUTHOR);
+
+		//when(emailBuilder.toString()).thenReturn(PR_AUTHOR);
+
 		when(prFromRef.getRepository()).thenReturn(repository);
 		when(prFromRef.getDisplayId()).thenReturn(SOURCE_BRANCH);
 		when(prFromRef.getLatestCommit()).thenReturn(COMMIT);
